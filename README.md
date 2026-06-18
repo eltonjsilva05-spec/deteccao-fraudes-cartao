@@ -1,206 +1,33 @@
-# 🚨 Detecção de Fraudes em Cartões de Crédito
+# 🛡️ Detecção de Fraudes em Cartão de Crédito
 
-Projeto desenvolvido como parte dos estudos de Ciência de Dados e Machine Learning, com foco na identificação de transações fraudulentas utilizando diferentes algoritmos de classificação.
-
----
-
-# 📖 Sobre o Projeto
-
-Fraudes em cartões de crédito representam um grande desafio para instituições financeiras devido ao alto volume de transações e ao forte desbalanceamento entre operações legítimas e fraudulentas.
-
-Neste projeto foram aplicadas técnicas de pré-processamento, balanceamento de classes e algoritmos de Machine Learning para detectar transações suspeitas.
+Projeto de Machine Learning para identificação de transações fraudulentas em cartões de crédito utilizando técnicas de balanceamento de dados, treinamento de múltiplos modelos e comparação de desempenho.
 
 ---
 
-# 🎯 Objetivos
+# 📋 Sobre o Projeto
 
-- Analisar um conjunto de dados real de transações financeiras.
-- Tratar o problema de desbalanceamento de classes.
-- Comparar diferentes algoritmos de classificação.
-- Avaliar modelos utilizando métricas adequadas para detecção de fraudes.
-- Selecionar automaticamente o melhor modelo.
+Fraudes em cartões de crédito representam um grande desafio para instituições financeiras devido à enorme quantidade de transações realizadas diariamente.
 
----
+Este projeto utiliza algoritmos de Machine Learning para identificar padrões suspeitos e classificar automaticamente transações como legítimas ou fraudulentas.
 
-# 📊 Dataset
-
-O projeto utiliza o dataset público:
-
-Credit Card Fraud Detection Dataset
-
-Características:
-
-- 284.807 transações
-- 492 fraudes
-- Dataset altamente desbalanceado
-- Variáveis anonimizadas através de PCA
-- Variável alvo: `Class`
-
-Onde:
-
-- 0 = Transação Normal
-- 1 = Fraude
-
-Fonte:
-
-https://storage.googleapis.com/download.tensorflow.org/data/creditcard.csv
+O objetivo principal é comparar diferentes modelos e selecionar a melhor solução para detecção de fraudes.
 
 ---
 
-# 🔄 Fluxo do Projeto
+# 🚀 Tecnologias Utilizadas
 
-```text
-Dataset
-   ↓
-Carregamento Automático
-   ↓
-Pré-processamento
-   ↓
-Transformação Logarítmica
-   ↓
-Padronização (StandardScaler)
-   ↓
-Train/Test Split
-   ↓
-SMOTE
-   ↓
-Treinamento dos Modelos
-   ↓
-Avaliação
-   ↓
-Comparação dos Resultados
-   ↓
-Seleção do Melhor Modelo
-```
+* Python 3.11
+* Pandas
+* NumPy
+* Matplotlib
+* Scikit-Learn
+* Imbalanced-Learn (SMOTE)
+* XGBoost
+* Joblib
 
 ---
 
-# 🧠 Técnicas Utilizadas
-
-## Pré-processamento
-
-### Transformação Logarítmica
-
-Aplicada na variável:
-
-```python
-Amount
-```
-
-Objetivo:
-
-- Reduzir assimetria dos dados
-- Melhorar desempenho dos algoritmos
-
-### Padronização
-
-Utilizando:
-
-```python
-StandardScaler()
-```
-
-Objetivo:
-
-- Colocar variáveis na mesma escala
-- Melhorar convergência dos modelos
-
----
-
-# ⚖️ Balanceamento das Classes
-
-O dataset possui pouquíssimas fraudes.
-
-Para corrigir esse problema foi utilizado:
-
-```python
-SMOTE
-```
-
-(Synthetic Minority Oversampling Technique)
-
-Objetivo:
-
-- Gerar exemplos sintéticos da classe minoritária.
-- Melhorar a capacidade de detecção de fraudes.
-
----
-
-# 🤖 Modelos Utilizados
-
-## Logistic Regression
-
-Modelo linear utilizado como baseline.
-
-Características:
-
-- Simples
-- Rápido
-- Fácil interpretação
-
----
-
-## Random Forest
-
-Modelo baseado em múltiplas árvores de decisão.
-
-Características:
-
-- Reduz overfitting
-- Boa performance em dados tabulares
-
----
-
-## XGBoost
-
-Modelo de Gradient Boosting.
-
-Características:
-
-- Alta performance
-- Excelente para datasets tabulares
-- Amplamente utilizado em projetos reais
-
----
-
-# 📈 Métricas Avaliadas
-
-Os modelos são avaliados utilizando:
-
-## Recall
-
-Métrica mais importante para fraude.
-
-Representa:
-
-> Quantas fraudes reais foram identificadas.
-
----
-
-## Precision
-
-Representa:
-
-> Quantas previsões de fraude realmente eram fraudes.
-
----
-
-## F1-Score
-
-Média harmônica entre:
-
-- Precision
-- Recall
-
----
-
-## ROC AUC
-
-Avalia a capacidade de separação entre as classes.
-
----
-
-# 📂 Estrutura do Projeto
+# 📁 Estrutura do Projeto
 
 ```text
 deteccao-fraudes-cartao/
@@ -214,10 +41,18 @@ deteccao-fraudes-cartao/
 │   └── apresentacao/
 │
 ├── models/
+│   ├── logistic.pkl
+│   ├── random_forest.pkl
+│   ├── xgboost.pkl
+│   └── best_model.pkl
 │
 ├── notebooks/
 │
 ├── results/
+│   ├── metricas.csv
+│   ├── XGBClassifier_roc.png
+│   ├── XGBClassifier_confusion_matrix.png
+│   └── feature_importance.png
 │
 ├── src/
 │   ├── config.py
@@ -225,7 +60,6 @@ deteccao-fraudes-cartao/
 │   ├── preprocessing.py
 │   ├── train.py
 │   ├── evaluate.py
-│   ├── explainability.py
 │   └── main.py
 │
 ├── README.md
@@ -235,138 +69,93 @@ deteccao-fraudes-cartao/
 
 ---
 
-# 🗂 Descrição dos Arquivos
+# 📊 Dataset
 
-## config.py
+O projeto utiliza o dataset público de transações financeiras disponibilizado pelo TensorFlow.
 
-Armazena as configurações gerais do projeto.
+O download é realizado automaticamente na primeira execução.
 
----
+Características:
 
-## data_loader.py
+* 284.807 transações
+* 31 colunas
+* Forte desbalanceamento entre classes
+* Variável alvo: `Class`
 
-Responsável pelo carregamento dos dados e download automático do dataset.
-
----
-
-## preprocessing.py
-
-Executa:
-
-- Transformação logarítmica
-- Padronização dos dados
+  * 0 = Transação legítima
+  * 1 = Fraude
 
 ---
 
-## train.py
+# ⚙️ Pré-Processamento
 
-Responsável por:
+Etapas realizadas:
 
-- Divisão treino/teste
-- Aplicação do SMOTE
-- Treinamento dos modelos
-- Salvamento dos modelos
-
----
-
-## evaluate.py
-
-Responsável por:
-
-- Classification Report
-- ROC AUC
-- Curva ROC
-- Matriz de Confusão
-- Comparação entre modelos
+* Carregamento automático do dataset
+* Transformação logarítmica da variável Amount
+* Padronização dos valores monetários
+* Separação entre treino e teste
+* Balanceamento utilizando SMOTE
 
 ---
 
-## explainability.py
+# 🤖 Modelos Treinados
 
-Implementa interpretabilidade utilizando:
+## Logistic Regression
 
-```python
-SHAP
-```
+Modelo linear utilizado como baseline.
 
----
+### Resultado
 
-## main.py
-
-Arquivo principal que executa todo o pipeline.
-
----
-
-# 📁 Arquivos Gerados
-
-Após a execução serão gerados:
-
-## Models
-
-```text
-models/
-├── logistic.pkl
-├── random_forest.pkl
-├── xgboost.pkl
-└── best_model.pkl
-```
+* Recall: 0.804
+* Precision: 0.181
+* F1 Score: 0.296
+* ROC AUC: 0.924
 
 ---
 
-## Results
+## Random Forest
 
-```text
-results/
-├── metricas.csv
-├── XGBClassifier_roc.png
-└── XGBClassifier_confusion_matrix.png
-```
+Modelo baseado em árvores de decisão.
 
----
+### Resultado
 
-# 🚀 Como Executar
-
-## Clonar o repositório
-
-```bash
-git clone URL_DO_REPOSITORIO
-```
+* Recall: 0.838
+* Precision: 0.617
+* F1 Score: 0.711
+* ROC AUC: 0.975
 
 ---
 
-## Instalar dependências
+## XGBoost
 
-```bash
-pip install -r requirements.txt
-```
+Modelo de Gradient Boosting.
 
----
+### Resultado
 
-## Executar
-
-```bash
-python src/main.py
-```
+* Recall: 0.824
+* Precision: 0.808
+* F1 Score: 0.816
+* ROC AUC: 0.978
 
 ---
 
-# 📊 Comparação dos Modelos
+# 🏆 Melhor Modelo
 
-Ao executar o projeto é gerado:
+Após a comparação automática dos modelos, o melhor desempenho foi obtido pelo:
 
-```text
-results/metricas.csv
-```
+## XGBoost
 
-Exemplo:
+### Métricas
 
-| Modelo | Recall | Precision | F1 |
-|----------|----------|----------|----------|
-| Logistic Regression | 0.84 | 0.91 | 0.87 |
-| Random Forest | 0.91 | 0.95 | 0.93 |
-| XGBoost | 0.95 | 0.97 | 0.96 |
+| Métrica   | Valor |
+| --------- | ----- |
+| Recall    | 0.824 |
+| Precision | 0.808 |
+| F1 Score  | 0.816 |
+| ROC AUC   | 0.978 |
 
-O melhor modelo é selecionado automaticamente e salvo como:
+O modelo é salvo automaticamente em:
 
 ```text
 models/best_model.pkl
@@ -374,37 +163,86 @@ models/best_model.pkl
 
 ---
 
-# 🔍 Interpretabilidade
+# 📈 Visualizações
 
-O projeto utiliza:
+## Curva ROC
 
-```python
-SHAP
-```
-
-para identificar quais variáveis possuem maior impacto nas previsões realizadas pelo modelo.
+![ROC](results/XGBClassifier_roc.png)
 
 ---
 
-# 📌 Melhorias Futuras
+## Matriz de Confusão
 
-- GridSearchCV
-- Feature Importance completa
-- Dashboard com Streamlit
-- API com FastAPI
-- Docker
-- Deploy em Cloud
-- Monitoramento de modelos
+![Confusion Matrix](results/XGBClassifier_confusion_matrix.png)
+
+---
+
+## Importância das Variáveis
+
+![Feature Importance](results/feature_importance.png)
+
+---
+
+# ▶️ Como Executar
+
+## Clonar repositório
+
+```bash
+git clone https://github.com/eltonjsilva05-spec/deteccao-fraudes-cartao.git
+```
+
+## Entrar na pasta
+
+```bash
+cd deteccao-fraudes-cartao
+```
+
+## Criar ambiente virtual
+
+```bash
+python -m venv .venv
+```
+
+## Ativar ambiente
+
+Windows:
+
+```bash
+.venv\Scripts\Activate.ps1
+```
+
+## Instalar dependências
+
+```bash
+pip install -r requirements.txt
+```
+
+## Executar projeto
+
+```bash
+cd src
+python main.py
+```
+
+---
+
+# 📌 Resultados
+
+O sistema:
+
+* Baixa automaticamente o dataset
+* Realiza o pré-processamento
+* Balanceia os dados com SMOTE
+* Treina três modelos
+* Compara os resultados
+* Seleciona automaticamente o melhor modelo
+* Salva métricas e gráficos
+* Exporta o modelo final
 
 ---
 
 # 👨‍💻 Autor
 
-Projeto desenvolvido durante os estudos de:
+**Elton Silva**
 
-- Python
-- Ciência de Dados
-- Machine Learning
-- Detecção de Fraudes
-
-Bootcamp DIO - Data Science & Machine Learning.
+Projeto desenvolvido para estudos em Ciência de Dados, Machine Learning e construção de portfólio profissional.

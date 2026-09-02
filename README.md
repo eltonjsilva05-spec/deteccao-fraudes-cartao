@@ -62,59 +62,66 @@ Data Loading
    │
    ▼
 Preprocessing
- ├── log1p(Amount)
- └── preparação das variáveis
+ └── criação de Amount_log
    │
    ▼
 Train / Test Split
    │
-   ├───────────────┐
-   ▼               ▼
-StandardScaler    SMOTE
- Train only       Train only
-   │               │
-   └───────┬───────┘
-           ▼
-     Model Training
-           │
-     ┌─────┼──────────────┐
-     ▼     ▼              ▼
+   ├──────────────────┐
+   ▼                  ▼
+StandardScaler       SMOTE
+ Train only          Train only
+   │                  │
+   └────────┬─────────┘
+            ▼
+      Model Training
+            │
+      ┌─────┼──────────────┐
+      ▼     ▼              ▼
  Logistic  Random Forest  XGBoost
- Regression
-     │     │              │
-     └─────┴──────────────┘
-           │
-           ▼
-    Model Evaluation
-           │
-           ├── Precision
-           ├── Recall
-           ├── F1-Score
-           ├── ROC-AUC
-           └── Average Precision
-           │
-           ▼
- Threshold Optimization
-           │
-           ▼
+Regression
+      │     │              │
+      └─────┴──────────────┘
+            │
+            ▼
+     Model Evaluation
+            │
+            ├── Precision
+            ├── Recall
+            ├── F1-Score
+            ├── ROC-AUC
+            └── Average Precision
+            │
+            ▼
+   Threshold Optimization
+            │
+            ▼
     SHAP Explainability
 ```
 
 ---
 
-## 🔬 Tratamento dos dados
+## 🔬 Pré-processamento
 
-### Transformação de `Amount`
+### Criação de `Amount_log`
 
-A variável `Amount` recebe uma transformação logarítmica para reduzir o impacto de valores muito discrepantes:
+Durante o pré-processamento, é criada uma versão logarítmica da variável `Amount`:
 
 ```python
 df["Amount_log"] = np.log1p(df["Amount"])
 ```
 
+Essa transformação é mantida no DataFrame como uma feature derivada.
+
+> **Observação:** na versão atual do pipeline, o treinamento utiliza a variável original `Amount`, que é posteriormente normalizada com `StandardScaler`. A feature `Amount_log` é criada durante o pré-processamento, mas ainda não é utilizada pelos modelos.
+
+Essa informação é documentada explicitamente para manter o README alinhado com a implementação atual.
+
 ### Normalização
 
-O `StandardScaler` é ajustado somente sobre os dados de treinamento:
+A variável `Amount` é normalizada utilizando `StandardScaler`.
+
+O scaler é ajustado somente sobre o conjunto de treinamento:
 
 ```text
 Treino → fit_transform()
@@ -123,9 +130,15 @@ Teste  → transform()
 
 Isso evita **data leakage**, impedindo que informações estatísticas do conjunto de teste influenciem o treinamento.
 
+O scaler utilizado no projeto também é salvo em:
+
+```text
+models/scaler.pkl
+```
+
 ### Tratamento do desbalanceamento
 
-O **SMOTE** foi aplicado exclusivamente ao conjunto de treinamento.
+O **SMOTE** é aplicado exclusivamente ao conjunto de treinamento utilizado pelos modelos de árvore.
 
 ```text
 Treino original
@@ -136,6 +149,8 @@ SMOTE
       ↓
 Treino balanceado
 ```
+
+A Logistic Regression utiliza `class_weight="balanced"` em vez de SMOTE.
 
 O conjunto de teste mantém sua distribuição original, proporcionando uma avaliação mais próxima do cenário real.
 
@@ -267,9 +282,10 @@ Durante o desenvolvimento foram praticados conceitos importantes de **Dados, Pyt
 * tratamento de datasets altamente desbalanceados;
 * divisão estratificada de treino e teste;
 * prevenção de data leakage;
-* transformação logarítmica;
+* transformação de features;
 * normalização de dados;
 * SMOTE;
+* `class_weight`;
 * treinamento de modelos supervisionados;
 * comparação de algoritmos;
 * Precision, Recall e F1-Score;
@@ -397,6 +413,7 @@ Os modelos e resultados serão gerados nas pastas correspondentes.
 
 Possíveis melhorias para uma versão futura:
 
+* utilizar `Amount_log` efetivamente no treinamento e avaliar seu impacto;
 * validação temporal (*time-based validation*);
 * engenharia de features;
 * calibração das probabilidades;

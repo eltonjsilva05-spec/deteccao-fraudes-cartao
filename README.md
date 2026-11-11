@@ -4,6 +4,18 @@ Projeto de Machine Learning desenvolvido para identificar transações potencial
 
 O projeto também conta com um **dashboard interativo desenvolvido com Streamlit**, permitindo explorar os resultados dos modelos, analisar métricas e avaliar diferentes thresholds de classificação.
 
+
+## 🚀 Demonstração Online
+
+**Acesse o dashboard publicado:**
+
+[Fraud Detection Analytics — Abrir aplicação](https://deteccao-fraudes-cartao-gu2sks9hkbc4l2iw3nzeap.streamlit.app/)
+
+O dashboard permite explorar os resultados dos modelos de Machine Learning, comparar métricas, analisar diferentes thresholds de classificação e visualizar explicações com SHAP.
+
+**Tecnologias:** Python, Streamlit, Pandas e Plotly.
+
+
 ---
 
 ## 📊 Dashboard — Fraud Detection Analytics

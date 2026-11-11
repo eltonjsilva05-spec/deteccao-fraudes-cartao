@@ -1,366 +1,207 @@
-# 💳 Detecção de Fraudes em Cartões de Crédito com Machine Learning
+# 🛡️ Detecção de Fraudes em Cartões de Crédito com Machine Learning
 
-> Pipeline de Machine Learning desenvolvido em Python para identificação de transações potencialmente fraudulentas, com tratamento de desbalanceamento, comparação de modelos, otimização de threshold e explicabilidade com SHAP.
+Projeto de Machine Learning desenvolvido para identificar transações potencialmente fraudulentas em cartões de crédito, utilizando técnicas de análise de dados, tratamento de dados desbalanceados, treinamento de modelos preditivos e explicabilidade.
 
-[![Python](https://img.shields.io/badge/Python-3.x-blue?logo=python)](https://www.python.org/)
-[![Pandas](https://img.shields.io/badge/Pandas-Data%20Analysis-150458?logo=pandas)](https://pandas.pydata.org/)
-[![Scikit-learn](https://img.shields.io/badge/Scikit--learn-Machine%20Learning-F7931E?logo=scikit-learn)](https://scikit-learn.org/)
-[![XGBoost](https://img.shields.io/badge/XGBoost-Gradient%20Boosting-189E68)](https://xgboost.readthedocs.io/)
-[![SHAP](https://img.shields.io/badge/SHAP-Explainability-red)](https://shap.readthedocs.io/)
-[![Imbalanced-learn](https://img.shields.io/badge/Imbalanced--learn-SMOTE-orange)](https://imbalanced-learn.org/)
+O projeto também conta com um **dashboard interativo desenvolvido com Streamlit**, permitindo explorar os resultados dos modelos, analisar métricas e avaliar diferentes thresholds de classificação.
 
 ---
 
-## 🎯 Visão geral
+## 📊 Dashboard — Fraud Detection Analytics
 
-Sistemas de detecção de fraude precisam identificar transações suspeitas sem gerar uma quantidade excessiva de falsos positivos.
+O projeto possui um dashboard interativo para apresentar os resultados da análise e do treinamento dos modelos.
 
-Este projeto implementa um pipeline completo de Machine Learning para esse cenário, passando por:
+### Funcionalidades
 
-* carregamento automatizado dos dados;
-* pré-processamento;
-* divisão estratificada entre treino e teste;
-* normalização;
-* tratamento de desbalanceamento com SMOTE;
-* treinamento de diferentes modelos;
-* avaliação com métricas apropriadas para fraude;
-* otimização do threshold de decisão;
-* explicabilidade utilizando SHAP;
-* persistência dos modelos e resultados.
+- Visão geral dos resultados.
+- Comparação entre modelos de Machine Learning.
+- Análise de métricas de classificação.
+- Simulação e avaliação de diferentes thresholds.
+- Visualização de resultados de explicabilidade.
+- Gráficos interativos com Plotly.
 
-O objetivo principal é desenvolver uma solução **reprodutível, modular e orientada à análise de resultados**.
+### Executar o dashboard
+
+Após instalar as dependências, execute na raiz do projeto:
+
+```bash
+streamlit run dashboard/app.py
+```
+
+O Streamlit abrirá o dashboard no navegador.
 
 ---
 
-## 📊 Dataset
-
-Foi utilizado o dataset público **Credit Card Fraud Detection**, disponibilizado pelo TensorFlow.
-
-| Característica  |       Valor |
-| --------------- | ----------: |
-| Transações      | **284.807** |
-| Variáveis       |      **31** |
-| Fraudes         |     **492** |
-| Classe legítima |         `0` |
-| Classe fraude   |         `1` |
-
-O dataset apresenta um forte desbalanceamento entre as classes.
-
-As variáveis `V1` até `V28` representam componentes transformados por PCA. O conjunto também contém as variáveis `Time` e `Amount`.
-
-O dataset bruto **não é versionado no GitHub**. Caso não esteja presente localmente, o pipeline realiza o download automaticamente.
-
----
-
-# 🏗️ Pipeline do projeto
-
-```text
-                 ┌─────────────────────┐
-                 │       Dataset       │
-                 │  Credit Card Fraud  │
-                 └──────────┬──────────┘
-                            │
-                            ▼
-                 ┌─────────────────────┐
-                 │    Data Loading     │
-                 │       Pandas       │
-                 └──────────┬──────────┘
-                            │
-                            ▼
-                 ┌─────────────────────┐
-                 │    Preprocessing    │
-                 │ criação Amount_log  │
-                 └──────────┬──────────┘
-                            │
-                            ▼
-                 ┌─────────────────────┐
-                 │  Train / Test Split │
-                 │      Stratified     │
-                 └──────────┬──────────┘
-                            │
-                  ┌─────────┴─────────┐
-                  │                   │
-                  ▼                   ▼
-          ┌──────────────┐    ┌──────────────┐
-          │ StandardScaler│    │    SMOTE     │
-          │  Train only   │    │  Train only  │
-          └───────┬───────┘    └───────┬──────┘
-                  │                    │
-                  └─────────┬──────────┘
-                            ▼
-                    Model Training
-                            │
-              ┌─────────────┼─────────────┐
-              ▼             ▼             ▼
-       Logistic        Random Forest   XGBoost
-       Regression
-              │             │             │
-              └─────────────┴─────────────┘
-                            │
-                            ▼
-                   Model Evaluation
-                            │
-                   ┌────────┼────────┐
-                   ▼        ▼        ▼
-               Precision  Recall  F1-Score
-                   │        │        │
-                   └────────┼────────┘
-                            │
-                            ▼
-                       ROC-AUC / AP
-                            │
-                            ▼
-                  Threshold Optimization
-                            │
-                            ▼
-                    SHAP Explainability
-```
+## 🎯 Objetivo do projeto
 
----
+Desenvolver um fluxo de análise e classificação de transações financeiras, buscando identificar fraudes com o equilíbrio adequado entre a detecção de operações fraudulentas e a redução de falsos positivos.
 
-# 🔬 Pré-processamento
+O projeto envolve:
 
-## Criação de `Amount_log`
+- Análise exploratória de dados.
+- Pré-processamento e transformação de variáveis.
+- Tratamento do desbalanceamento entre classes.
+- Treinamento e comparação de modelos.
+- Avaliação de métricas de classificação.
+- Otimização de threshold.
+- Explicabilidade das previsões.
+- Apresentação dos resultados em dashboard.
 
-Durante o pré-processamento, é criada uma versão logarítmica da variável `Amount`:
+## 📁 Dataset
 
-```python
-df["Amount_log"] = np.log1p(df["Amount"])
-```
+Foi utilizado o conjunto de dados público **Credit Card Fraud Detection**.
 
-Essa transformação reduz o impacto de valores muito discrepantes e cria uma feature derivada que pode ser utilizada em futuras versões do pipeline.
+Características do conjunto de dados:
 
-> **Observação:** na versão atual do pipeline, o treinamento utiliza a variável original `Amount`, que posteriormente é normalizada com `StandardScaler`. A feature `Amount_log` é criada durante o pré-processamento, mas ainda não é utilizada pelos modelos.
+| Característica | Quantidade |
+|---|---:|
+| Total de transações | 284.807 |
+| Variáveis | 31 |
+| Transações fraudulentas | 492 |
+| Transações legítimas | 284.315 |
 
-Essa informação é documentada explicitamente para manter o README alinhado com a implementação atual.
+A variável `Class` identifica o tipo de transação:
 
-## Normalização
+- `0`: transação legítima.
+- `1`: transação fraudulenta.
 
-A variável `Amount` é normalizada utilizando `StandardScaler`.
+As variáveis `V1` até `V28` correspondem a componentes transformados por PCA. O conjunto também contém as variáveis `Time` e `Amount`.
 
-O scaler é ajustado **somente sobre o conjunto de treinamento**:
+O dataset original não é versionado neste repositório. O pipeline realiza o download dos dados quando necessário.
 
-```text
-Treino → fit_transform()
+## ⚙️ Pipeline de Machine Learning
 
-Teste  → transform()
-```
+O desenvolvimento foi organizado em etapas:
 
-Isso evita **data leakage**, impedindo que informações estatísticas do conjunto de teste influenciem o treinamento.
+1. Carregamento dos dados.
+2. Análise exploratória.
+3. Verificação de valores e distribuição das classes.
+4. Pré-processamento das variáveis.
+5. Separação dos dados de treinamento e teste.
+6. Aplicação de técnicas para lidar com o desbalanceamento.
+7. Treinamento dos modelos.
+8. Avaliação e comparação dos resultados.
+9. Análise de threshold.
+10. Explicabilidade das previsões.
 
-O scaler utilizado no projeto também é salvo em:
+### Pré-processamento
 
-```text
-models/scaler.pkl
-```
+Foram utilizadas técnicas como:
 
-## Tratamento do desbalanceamento
+- Padronização de variáveis numéricas com `StandardScaler`.
+- Transformação logarítmica da variável `Amount`, com criação de `Amount_log` durante o processamento.
+- Separação entre treinamento e teste.
+- Balanceamento da classe minoritária com SMOTE.
 
-O dataset possui uma quantidade muito pequena de fraudes em comparação com transações legítimas.
+### Modelos avaliados
 
-Para os modelos de árvore, o **SMOTE** é aplicado exclusivamente ao conjunto de treinamento:
+Foram desenvolvidos e comparados três modelos:
 
-```text
-Treino original
-      ↓
-StandardScaler
-      ↓
-SMOTE
-      ↓
-Treino balanceado
-```
+- Logistic Regression
+- Random Forest
+- XGBoost
 
-A **Logistic Regression** utiliza `class_weight="balanced"` em vez de SMOTE.
+## 📈 Resultados dos modelos
 
-O conjunto de teste mantém sua distribuição original, proporcionando uma avaliação mais próxima do cenário real.
+Os modelos foram avaliados utilizando métricas adequadas para problemas de classificação desbalanceada.
 
----
+Resultados obtidos no conjunto de teste:
 
-# 🤖 Modelos avaliados
+| Modelo | Recall | Precision | F1-score | ROC-AUC | Average Precision |
+|---|---:|---:|---:|---:|---:|
+| Logistic Regression | 0,8784 | 0,0654 | 0,1217 | 0,9676 | 0,7033 |
+| Random Forest | 0,8378 | 0,6139 | 0,7086 | 0,9790 | 0,7870 |
+| XGBoost | 0,8176 | 0,8521 | 0,8345 | 0,9757 | 0,8405 |
 
-Foram comparados três modelos:
+### Análise dos resultados
 
-## Logistic Regression
+O XGBoost apresentou o melhor F1-score, Precision e Average Precision entre os modelos avaliados.
 
-Utilizada como modelo de referência (*baseline*), com:
+O Random Forest obteve o maior ROC-AUC, enquanto a Regressão Logística apresentou o maior Recall.
 
-```python
-class_weight="balanced"
-```
+Essa comparação demonstra que a escolha do modelo depende do objetivo da operação e do equilíbrio desejado entre fraudes detectadas e falsos alertas.
 
-## Random Forest
+## 🎚️ Análise de Threshold
 
-Modelo baseado em múltiplas árvores de decisão, treinado utilizando o conjunto balanceado pelo SMOTE.
+Além da comparação dos modelos, foi realizada uma análise de diferentes limiares de classificação.
 
-## XGBoost
+O threshold padrão de 0,50 apresentou os seguintes resultados para o XGBoost:
 
-Modelo baseado em Gradient Boosting e utilizado como principal candidato para a solução final.
+| Métrica | Resultado |
+|---|---:|
+| Precision | 0,8521 |
+| Recall | 0,8176 |
+| F1-score | 0,8345 |
 
----
+Também foi avaliado o threshold de 0,77:
 
-# 📈 Resultados
+| Métrica | Resultado |
+|---|---:|
+| Precision | 0,8947 |
+| Recall | 0,8041 |
+| F1-score | 0,8470 |
 
-A avaliação foi realizada sobre **85.443 transações de teste**, mantendo o desbalanceamento original.
+O ajuste do threshold permite modificar o comportamento do classificador, buscando um equilíbrio mais adequado entre precisão e capacidade de detecção.
 
-| Modelo              |  Precision | Recall |   F1-Score |    ROC-AUC | Average Precision |
-| ------------------- | ---------: | -----: | ---------: | ---------: | ----------------: |
-| Logistic Regression |     0.0654 | 0.8784 |     0.1217 |     0.9676 |            0.7033 |
-| Random Forest       |     0.6139 | 0.8378 |     0.7086 | **0.9790** |            0.7870 |
-| **XGBoost**         | **0.8521** | 0.8176 | **0.8345** |     0.9757 |        **0.8405** |
+## 🔍 Explicabilidade com SHAP
 
-## 🏆 Modelo selecionado
+Foi utilizada a biblioteca SHAP para investigar como as variáveis influenciam as previsões do modelo.
 
-O **XGBoost apresentou o melhor F1-Score** entre os modelos avaliados.
+A explicabilidade ajuda a compreender quais características contribuíram para uma classificação, tornando a análise dos resultados mais interpretável.
 
-```text
-Precision:           0.8521
-Recall:              0.8176
-F1-Score:            0.8345
-ROC-AUC:             0.9757
-Average Precision:   0.8405
-```
+## 📊 Visualizações dos resultados
 
-Na avaliação padrão com threshold `0.50`:
+### Matriz de confusão
 
-```text
-Verdadeiros Negativos: 85.274
-Falsos Positivos:          21
-Falsos Negativos:          27
-Verdadeiros Positivos:    121
-```
-
----
-
-# 🎚️ Otimização do Threshold
-
-Em problemas de fraude, o threshold padrão `0.50` nem sempre representa a melhor decisão de negócio.
-
-Por isso, foram avaliados thresholds entre `0.01` e `0.99`, utilizando o F1-Score como critério de seleção.
-
-## Melhor resultado encontrado
-
-```text
-Threshold: 0.77
-Precision: 0.8947
-Recall:    0.8041
-F1-Score:  0.8470
-```
-
-### Comparação
-
-| Configuração       |  Precision | Recall |   F1-Score |
-| ------------------ | ---------: | -----: | ---------: |
-| Threshold 0.50     |     0.8521 | 0.8176 |     0.8345 |
-| **Threshold 0.77** | **0.8947** | 0.8041 | **0.8470** |
-
-### Interpretação
-
-Ao aumentar o threshold, o modelo se torna mais seletivo ao classificar uma transação como fraude.
-
-Neste experimento, isso resultou em:
-
-* aumento da Precision;
-* pequena redução do Recall;
-* aumento do F1-Score.
-
-> **Importante:** o threshold `0.77` é específico deste experimento e deste conjunto de teste. Em um ambiente de produção, sua definição deveria considerar custos reais de falsos positivos e falsos negativos, validação temporal e monitoramento do modelo.
-
-![Threshold Analysis](results/threshold_analysis.png)
-
----
-
-# 🔎 Explainability com SHAP
-
-Além de prever fraudes, o projeto busca responder:
-
-> **Por que o modelo classificou determinada transação como potencialmente fraudulenta?**
-
-Para isso foi utilizada a biblioteca **SHAP (SHapley Additive exPlanations)**.
-
-O projeto gera uma explicação local para uma transação específica, permitindo analisar a contribuição das variáveis para a decisão do modelo.
-
-### Exemplo gerado pelo projeto
-
-![SHAP](results/shap_local.png)
-
----
-
-# 📊 Visualizações
-
-### Matriz de Confusão
-
-![Confusion Matrix](results/XGBClassifier_confusion_matrix.png)
+![Matriz de Confusão](results/XGBClassifier_confusion_matrix.png)
 
 ### Curva ROC
 
-![ROC Curve](results/XGBClassifier_roc.png)
+![Curva ROC](results/XGBClassifier_roc.png)
 
-### Precision-Recall
+### Curva Precision-Recall
 
-![Precision Recall](results/XGBClassifier_precision_recall.png)
+![Curva Precision-Recall](results/XGBClassifier_precision_recall.png)
 
-### Importância das Variáveis
+### Importância das variáveis
 
-![Feature Importance](results/feature_importance.png)
+![Importância das variáveis](results/feature_importance.png)
 
----
+### Análise de Threshold
 
-# 🧠 Principais aprendizados técnicos
+![Análise de Threshold](results/threshold_analysis.png)
 
-Durante o desenvolvimento foram praticados conceitos importantes de **Dados, Python e Machine Learning**, incluindo:
+### Explicabilidade SHAP
 
-* análise e manipulação de dados com Pandas;
-* tratamento de datasets altamente desbalanceados;
-* divisão estratificada de treino e teste;
-* prevenção de data leakage;
-* transformação de features;
-* normalização de dados;
-* transformação logarítmica;
-* SMOTE;
-* `class_weight`;
-* treinamento de modelos supervisionados;
-* comparação de algoritmos;
-* Precision, Recall e F1-Score;
-* ROC-AUC;
-* Average Precision;
-* matriz de confusão;
-* otimização de threshold;
-* interpretação de modelos com SHAP;
-* persistência de modelos com Joblib;
-* organização modular de projetos Python;
-* geração automatizada de métricas e visualizações.
+![Explicabilidade SHAP](results/shap_local.png)
 
----
+## 🧰 Tecnologias utilizadas
 
-# 🛠️ Tecnologias
+- **Python:** linguagem de programação.
+- **Pandas e NumPy:** manipulação e análise de dados.
+- **Matplotlib:** visualização de dados.
+- **Scikit-learn:** treinamento e avaliação de modelos.
+- **Imbalanced-learn:** tratamento do desbalanceamento com SMOTE.
+- **XGBoost:** modelo de classificação.
+- **SHAP:** explicabilidade dos modelos.
+- **Streamlit:** desenvolvimento do dashboard.
+- **Plotly:** gráficos interativos.
+- **Git e GitHub:** versionamento e documentação.
 
-| Tecnologia           | Utilização                      |
-| -------------------- | ------------------------------- |
-| **Python**           | Linguagem principal             |
-| **Pandas**           | Manipulação e análise dos dados |
-| **NumPy**            | Operações numéricas             |
-| **Scikit-learn**     | Machine Learning e métricas     |
-| **XGBoost**          | Gradient Boosting               |
-| **Imbalanced-learn** | SMOTE                           |
-| **SHAP**             | Explainability                  |
-| **Matplotlib**       | Visualização                    |
-| **Joblib**           | Persistência dos modelos        |
-| **Git / GitHub**     | Versionamento                   |
-
----
-
-# 📁 Estrutura do projeto
+## 📂 Estrutura do projeto
 
 ```text
 deteccao-fraudes-cartao/
 │
+├── dashboard/
+│   ├── app.py
+│   ├── charts.py
+│   ├── metrics.py
+│   └── styles.py
+│
 ├── data/
-│   ├── raw/
-│   └── processed/
+│   └── raw/
 │
 ├── docs/
-│   ├── imagens/
-│   └── apresentacao/
 │
 ├── models/
 │
@@ -368,121 +209,105 @@ deteccao-fraudes-cartao/
 │   └── 01_analise_exploratoria.ipynb
 │
 ├── results/
-│   ├── XGBClassifier_confusion_matrix.png
-│   ├── XGBClassifier_precision_recall.png
-│   ├── XGBClassifier_roc.png
-│   ├── feature_importance.png
 │   ├── metricas.csv
-│   ├── shap_local.png
 │   ├── threshold_analysis.csv
-│   └── threshold_analysis.png
+│   ├── threshold_analysis.png
+│   ├── shap_local.png
+│   ├── XGBClassifier_confusion_matrix.png
+│   ├── XGBClassifier_roc.png
+│   ├── XGBClassifier_precision_recall.png
+│   └── feature_importance.png
 │
 ├── src/
-│   ├── config.py
-│   ├── data_loader.py
-│   ├── evaluate.py
-│   ├── explainability.py
-│   ├── main.py
-│   ├── preprocessing.py
-│   ├── threshold_analysis.py
-│   └── train.py
 │
 ├── .gitignore
 ├── README.md
 └── requirements.txt
 ```
 
----
+## 🚀 Como executar o projeto
 
-# ▶️ Como executar
-
-## 1. Clonar o repositório
+### 1. Clonar o repositório
 
 ```bash
 git clone https://github.com/eltonjsilva05-spec/deteccao-fraudes-cartao.git
+```
 
+### 2. Entrar na pasta
+
+```bash
 cd deteccao-fraudes-cartao
 ```
 
-## 2. Criar o ambiente virtual
-
-### Windows
+### 3. Criar ambiente virtual
 
 ```bash
 python -m venv .venv
 ```
 
-### Git Bash
+### 4. Ativar o ambiente virtual
 
-```bash
-source .venv/Scripts/activate
-```
-
-### PowerShell
+No Windows PowerShell:
 
 ```powershell
 .venv\Scripts\Activate.ps1
 ```
 
-## 3. Instalar dependências
+No Git Bash:
+
+```bash
+source .venv/Scripts/activate
+```
+
+### 5. Instalar dependências
 
 ```bash
 pip install -r requirements.txt
 ```
 
-## 4. Executar o pipeline
+### 6. Executar o pipeline
 
 ```bash
 python src/main.py
 ```
 
-Caso o dataset ainda não esteja presente em `data/raw/`, o projeto realiza o download automaticamente.
+### 7. Executar o dashboard
 
-Os resultados serão gerados em:
-
-```text
-results/
+```bash
+streamlit run dashboard/app.py
 ```
 
----
+## 💡 Aprendizados
 
-# 🚀 Próximas evoluções
+Durante o desenvolvimento deste projeto, foram trabalhados conceitos importantes de Ciência de Dados e Machine Learning:
 
-Algumas possibilidades para evolução do projeto:
+- Análise exploratória e preparação de dados.
+- Identificação de problemas de desbalanceamento.
+- Aplicação de SMOTE.
+- Treinamento e comparação de algoritmos.
+- Interpretação de métricas de classificação.
+- Ajuste de threshold conforme o objetivo do modelo.
+- Explicabilidade utilizando SHAP.
+- Organização de resultados e visualizações.
+- Desenvolvimento de uma interface interativa com Streamlit.
 
-* utilizar `Amount_log` efetivamente no treinamento e avaliar seu impacto;
-* validação temporal (*time-based validation*);
-* engenharia de features;
-* calibração das probabilidades;
-* otimização de hiperparâmetros;
-* comparação com modelos adicionais;
-* análise de custo financeiro de falsos positivos e falsos negativos;
-* criação de pipeline de inferência para novas transações;
-* API para disponibilização do modelo;
-* monitoramento de *data drift* e *model drift*;
-* containerização com Docker;
-* integração com pipelines de dados.
+## 🔭 Possíveis evoluções
 
----
+- Disponibilização do dashboard em ambiente cloud.
+- Integração com uma API para disponibilizar previsões.
+- Monitoramento de desempenho dos modelos.
+- Atualização automatizada dos dados e métricas.
+- Evolução do fluxo de processamento e implantação.
 
-# 👨‍💻 Sobre o projeto
-
-Este projeto faz parte do meu portfólio de transição e desenvolvimento profissional na área de **Dados e Tecnologia**, com foco em:
-
-**Python • SQL • ETL/ELT • Machine Learning • Análise de Dados • Power BI**
-
-Meu objetivo é desenvolver soluções orientadas a dados capazes de transformar informações em **insights, automação e suporte à tomada de decisão**.
-
-## 👤 Autor
+## 👨‍💻 Autor
 
 **Elton Jhon Silva**
 
-**Data & Python | SQL | ETL/ELT | Machine Learning | Power BI**
+Estudante de Análise e Desenvolvimento de Sistemas, em transição de carreira para a área de Dados e Engenharia de Dados.
 
-🔗 LinkedIn: [linkedin.com/in/eltonjsilva](https://www.linkedin.com/in/eltonjsilva)
-
-🔗 GitHub: [github.com/eltonjsilva05-spec](https://github.com/eltonjsilva05-spec)
+- [LinkedIn](https://www.linkedin.com/in/eltonjsilva)
+- [GitHub](https://github.com/eltonjsilva05-spec)
 
 ---
 
-⭐ Se este projeto foi útil ou interessante, considere deixar uma estrela no repositório.
+*Projeto desenvolvido para fins de estudo, prática e construção de portfólio na área de Dados e Machine Learning.*

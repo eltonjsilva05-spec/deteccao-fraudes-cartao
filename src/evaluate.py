@@ -1,13 +1,16 @@
+
 import os
 
 import matplotlib.pyplot as plt
+import numpy as np
+
+from matplotlib.colors import LinearSegmentedColormap
 
 from sklearn.metrics import (
     classification_report,
     roc_auc_score,
     average_precision_score,
     confusion_matrix,
-    ConfusionMatrixDisplay,
     roc_curve,
     precision_recall_curve,
     precision_score,
@@ -18,20 +21,112 @@ from sklearn.metrics import (
 from config import RESULTS_PATH
 
 
+# ============================================================
+# IDENTIDADE VISUAL — FRAUD ANALYTICS
+# ============================================================
+
+BACKGROUND = "#0b1120"
+PANEL = "#111827"
+GRID = "#263449"
+TEXT = "#e2e8f0"
+MUTED = "#94a3b8"
+
+CYAN = "#38bdf8"
+BLUE = "#3b82f6"
+PURPLE = "#a78bfa"
+GREEN = "#34d399"
+RED = "#fb7185"
+YELLOW = "#fbbf24"
+
+GRADIENT = LinearSegmentedColormap.from_list(
+    "fraud_gradient",
+    [
+        "#172554",
+        "#2563eb",
+        "#38bdf8",
+        "#34d399"
+    ]
+)
+
+
+def configurar_grafico(figsize=(10, 6)):
+    """
+    Configura o padrão visual dos gráficos.
+    """
+
+    fig, ax = plt.subplots(
+        figsize=figsize,
+        facecolor=BACKGROUND
+    )
+
+    ax.set_facecolor(PANEL)
+
+    ax.tick_params(
+        colors=MUTED,
+        labelsize=10
+    )
+
+    ax.xaxis.label.set_color(TEXT)
+    ax.yaxis.label.set_color(TEXT)
+
+    ax.title.set_color(TEXT)
+
+    for spine in ax.spines.values():
+        spine.set_color(GRID)
+
+    ax.grid(
+        True,
+        color=GRID,
+        linestyle="--",
+        linewidth=0.7,
+        alpha=0.7
+    )
+
+    ax.set_axisbelow(True)
+
+    return fig, ax
+
+
+def salvar_grafico(fig, nome_arquivo):
+    """
+    Salva o gráfico mantendo o padrão visual.
+    """
+
+    os.makedirs(
+        RESULTS_PATH,
+        exist_ok=True
+    )
+
+    caminho = os.path.join(
+        RESULTS_PATH,
+        nome_arquivo
+    )
+
+    fig.savefig(
+        caminho,
+        dpi=240,
+        bbox_inches="tight",
+        facecolor=BACKGROUND,
+        edgecolor=BACKGROUND
+    )
+
+    plt.close(fig)
+
+
+# ============================================================
+# AVALIAÇÃO DOS MODELOS
+# ============================================================
+
 def avaliar_modelo(modelo, X_test, y_test):
     """
     Avalia o desempenho do modelo no conjunto de teste.
 
-    Métricas utilizadas:
+    Métricas:
     - Precision
     - Recall
     - F1-Score
     - ROC-AUC
-    - Average Precision (AP)
-
-    O conjunto de teste mantém sua distribuição original,
-    permitindo uma avaliação mais realista do problema
-    de fraude.
+    - Average Precision
     """
 
     y_pred = modelo.predict(X_test)
@@ -52,10 +147,6 @@ def avaliar_modelo(modelo, X_test, y_test):
         )
     )
 
-    # ---------------------------------------------------------
-    # Métricas baseadas em probabilidade
-    # ---------------------------------------------------------
-
     roc_auc = None
     average_precision = None
 
@@ -75,17 +166,8 @@ def avaliar_modelo(modelo, X_test, y_test):
             y_probs
         )
 
-        print(
-            f"ROC-AUC: {roc_auc:.4f}"
-        )
-
-        print(
-            f"Average Precision: {average_precision:.4f}"
-        )
-
-    # ---------------------------------------------------------
-    # Métricas principais
-    # ---------------------------------------------------------
+        print(f"ROC-AUC: {roc_auc:.4f}")
+        print(f"Average Precision: {average_precision:.4f}")
 
     precision = precision_score(
         y_test,
@@ -105,21 +187,9 @@ def avaliar_modelo(modelo, X_test, y_test):
         zero_division=0
     )
 
-    print(
-        f"Precision: {precision:.4f}"
-    )
-
-    print(
-        f"Recall:    {recall:.4f}"
-    )
-
-    print(
-        f"F1-Score:  {f1:.4f}"
-    )
-
-    # ---------------------------------------------------------
-    # Matriz de confusão
-    # ---------------------------------------------------------
+    print(f"Precision: {precision:.4f}")
+    print(f"Recall:    {recall:.4f}")
+    print(f"F1-Score:  {f1:.4f}")
 
     cm = confusion_matrix(
         y_test,
@@ -129,22 +199,10 @@ def avaliar_modelo(modelo, X_test, y_test):
     tn, fp, fn, tp = cm.ravel()
 
     print("\nMatriz de Confusão:")
-
-    print(
-        f"Verdadeiros Negativos: {tn:,}"
-    )
-
-    print(
-        f"Falsos Positivos:      {fp:,}"
-    )
-
-    print(
-        f"Falsos Negativos:      {fn:,}"
-    )
-
-    print(
-        f"Verdadeiros Positivos: {tp:,}"
-    )
+    print(f"Verdadeiros Negativos: {tn:,}")
+    print(f"Falsos Positivos:      {fp:,}")
+    print(f"Falsos Negativos:      {fn:,}")
+    print(f"Verdadeiros Positivos: {tp:,}")
 
     return {
         "Recall": recall,
@@ -155,25 +213,17 @@ def avaliar_modelo(modelo, X_test, y_test):
     }
 
 
-def gerar_curva_roc(
-    modelo,
-    X_test,
-    y_test
-):
+# ============================================================
+# CURVA ROC
+# ============================================================
+
+def gerar_curva_roc(modelo, X_test, y_test):
     """
-    Gera e salva a curva ROC.
+    Gera uma curva ROC com identidade visual Fraud Analytics.
     """
 
-    if not hasattr(
-        modelo,
-        "predict_proba"
-    ):
+    if not hasattr(modelo, "predict_proba"):
         return
-
-    os.makedirs(
-        RESULTS_PATH,
-        exist_ok=True
-    )
 
     y_probs = modelo.predict_proba(
         X_test
@@ -189,50 +239,75 @@ def gerar_curva_roc(
         y_probs
     )
 
-    plt.figure(
-        figsize=(8, 5)
+    fig, ax = configurar_grafico(
+        figsize=(10, 6)
     )
 
-    plt.plot(
+    ax.plot(
         fpr,
         tpr,
-        label=f"ROC-AUC = {roc_auc:.4f}"
+        color=CYAN,
+        linewidth=3,
+        label=f"ROC-AUC: {roc_auc:.2%}"
     )
 
-    plt.plot(
+    ax.fill_between(
+        fpr,
+        tpr,
+        color=CYAN,
+        alpha=0.12
+    )
+
+    ax.plot(
         [0, 1],
         [0, 1],
+        color=MUTED,
         linestyle="--",
-        label="Aleatório"
+        linewidth=1.5,
+        alpha=0.7,
+        label="Classificador aleatório"
     )
 
-    plt.xlabel(
-        "False Positive Rate"
+    ax.set_title(
+        "ROC CURVE",
+        fontsize=16,
+        fontweight="bold",
+        loc="left",
+        pad=18
     )
 
-    plt.ylabel(
-        "True Positive Rate"
+    ax.set_xlabel(
+        "False Positive Rate",
+        fontsize=11,
+        labelpad=10
     )
 
-    plt.title(
-        f"Curva ROC - {type(modelo).__name__}"
+    ax.set_ylabel(
+        "True Positive Rate",
+        fontsize=11,
+        labelpad=10
     )
 
-    plt.legend()
+    ax.set_xlim(0, 1)
+    ax.set_ylim(0, 1.03)
 
-    plt.tight_layout()
-
-    plt.savefig(
-        os.path.join(
-            RESULTS_PATH,
-            f"{type(modelo).__name__}_roc.png"
-        ),
-        dpi=200,
-        bbox_inches="tight"
+    ax.legend(
+        loc="lower right",
+        facecolor=PANEL,
+        edgecolor=GRID,
+        labelcolor=TEXT,
+        fontsize=10
     )
 
-    plt.close()
+    salvar_grafico(
+        fig,
+        f"{type(modelo).__name__}_roc.png"
+    )
 
+
+# ============================================================
+# CURVA PRECISION-RECALL
+# ============================================================
 
 def gerar_curva_precision_recall(
     modelo,
@@ -240,22 +315,11 @@ def gerar_curva_precision_recall(
     y_test
 ):
     """
-    Gera e salva a curva Precision-Recall.
-
-    A curva é especialmente importante em problemas
-    de classificação altamente desbalanceados.
+    Gera uma curva Precision-Recall com identidade visual.
     """
 
-    if not hasattr(
-        modelo,
-        "predict_proba"
-    ):
+    if not hasattr(modelo, "predict_proba"):
         return
-
-    os.makedirs(
-        RESULTS_PATH,
-        exist_ok=True
-    )
 
     y_probs = modelo.predict_proba(
         X_test
@@ -271,47 +335,76 @@ def gerar_curva_precision_recall(
         y_probs
     )
 
-    plt.figure(
-        figsize=(8, 5)
+    baseline = np.mean(y_test)
+
+    fig, ax = configurar_grafico(
+        figsize=(10, 6)
     )
 
-    plt.plot(
+    ax.plot(
         recall,
         precision,
-        label=(
-            f"Average Precision = "
-            f"{average_precision:.4f}"
-        )
+        color=PURPLE,
+        linewidth=3,
+        label=f"Average Precision: {average_precision:.2%}"
     )
 
-    plt.xlabel(
-        "Recall"
+    ax.fill_between(
+        recall,
+        precision,
+        color=PURPLE,
+        alpha=0.12
     )
 
-    plt.ylabel(
-        "Precision"
+    ax.axhline(
+        y=baseline,
+        color=YELLOW,
+        linestyle="--",
+        linewidth=1.5,
+        alpha=0.8,
+        label=f"Baseline: {baseline:.2%}"
     )
 
-    plt.title(
-        f"Curva Precision-Recall - "
-        f"{type(modelo).__name__}"
+    ax.set_title(
+        "PRECISION-RECALL CURVE",
+        fontsize=16,
+        fontweight="bold",
+        loc="left",
+        pad=18
     )
 
-    plt.legend()
-
-    plt.tight_layout()
-
-    plt.savefig(
-        os.path.join(
-            RESULTS_PATH,
-            f"{type(modelo).__name__}_precision_recall.png"
-        ),
-        dpi=200,
-        bbox_inches="tight"
+    ax.set_xlabel(
+        "Recall",
+        fontsize=11,
+        labelpad=10
     )
 
-    plt.close()
+    ax.set_ylabel(
+        "Precision",
+        fontsize=11,
+        labelpad=10
+    )
 
+    ax.set_xlim(0, 1)
+    ax.set_ylim(0, 1.03)
+
+    ax.legend(
+        loc="lower left",
+        facecolor=PANEL,
+        edgecolor=GRID,
+        labelcolor=TEXT,
+        fontsize=10
+    )
+
+    salvar_grafico(
+        fig,
+        f"{type(modelo).__name__}_precision_recall.png"
+    )
+
+
+# ============================================================
+# MATRIZ DE CONFUSÃO
+# ============================================================
 
 def gerar_matriz_confusao(
     modelo,
@@ -319,121 +412,195 @@ def gerar_matriz_confusao(
     y_test
 ):
     """
-    Gera e salva a matriz de confusão.
+    Gera uma matriz de confusão em formato de mapa de calor.
     """
 
-    os.makedirs(
-        RESULTS_PATH,
-        exist_ok=True
-    )
-
-    y_pred = modelo.predict(
-        X_test
-    )
+    y_pred = modelo.predict(X_test)
 
     cm = confusion_matrix(
         y_test,
         y_pred
     )
 
-    disp = ConfusionMatrixDisplay(
-        confusion_matrix=cm,
-        display_labels=[
-            "Legítima",
-            "Fraude"
-        ]
+    fig, ax = configurar_grafico(
+        figsize=(8, 7)
     )
 
-    fig, ax = plt.subplots(
-        figsize=(7, 6)
+    image = ax.imshow(
+        cm,
+        interpolation="nearest",
+        cmap=GRADIENT
     )
 
-    disp.plot(
+    colorbar = fig.colorbar(
+        image,
         ax=ax,
-        values_format="d"
+        fraction=0.046,
+        pad=0.04
+    )
+
+    colorbar.ax.yaxis.set_tick_params(
+        color=MUTED
+    )
+
+    plt.setp(
+        colorbar.ax.yaxis.get_ticklabels(),
+        color=MUTED
+    )
+
+    labels = [
+        "Legítima",
+        "Fraude"
+    ]
+
+    ax.set_xticks([0, 1])
+    ax.set_yticks([0, 1])
+
+    ax.set_xticklabels(labels)
+    ax.set_yticklabels(labels)
+
+    ax.set_xlabel(
+        "Classe prevista",
+        fontsize=11,
+        labelpad=12
+    )
+
+    ax.set_ylabel(
+        "Classe real",
+        fontsize=11,
+        labelpad=12
     )
 
     ax.set_title(
-        f"Matriz de Confusão - "
-        f"{type(modelo).__name__}"
+        "CONFUSION MATRIX",
+        fontsize=16,
+        fontweight="bold",
+        loc="left",
+        pad=20
     )
 
-    plt.tight_layout()
+    threshold = cm.max() / 2
 
-    plt.savefig(
-        os.path.join(
-            RESULTS_PATH,
-            f"{type(modelo).__name__}_confusion_matrix.png"
-        ),
-        dpi=200,
-        bbox_inches="tight"
+    for i in range(cm.shape[0]):
+        for j in range(cm.shape[1]):
+
+            ax.text(
+                j,
+                i,
+                f"{cm[i, j]:,}",
+                ha="center",
+                va="center",
+                fontsize=17,
+                fontweight="bold",
+                color="white" if cm[i, j] > threshold else TEXT
+            )
+
+    ax.set_xticks(
+        np.arange(-0.5, 2, 1),
+        minor=True
     )
 
-    plt.close()
+    ax.set_yticks(
+        np.arange(-0.5, 2, 1),
+        minor=True
+    )
 
+    ax.grid(
+        which="minor",
+        color=BACKGROUND,
+        linestyle="-",
+        linewidth=3
+    )
+
+    ax.tick_params(
+        which="minor",
+        bottom=False,
+        left=False
+    )
+
+    salvar_grafico(
+        fig,
+        f"{type(modelo).__name__}_confusion_matrix.png"
+    )
+
+
+# ============================================================
+# IMPORTÂNCIA DAS VARIÁVEIS
+# ============================================================
 
 def gerar_importancia_variaveis(
     modelo,
     X_train
 ):
     """
-    Gera e salva o gráfico de importância das variáveis
-    para modelos que possuem feature_importances_.
+    Gera um gráfico horizontal de importância das variáveis.
     """
 
-    if not hasattr(
-        modelo,
-        "feature_importances_"
-    ):
+    if not hasattr(modelo, "feature_importances_"):
         return
-
-    os.makedirs(
-        RESULTS_PATH,
-        exist_ok=True
-    )
 
     importancia = modelo.feature_importances_
 
-    indices = importancia.argsort()[::-1]
+    indices = importancia.argsort()
 
     nomes = X_train.columns[indices]
     valores = importancia[indices]
 
-    plt.figure(
-        figsize=(12, 6)
+    fig, ax = configurar_grafico(
+        figsize=(11, 8)
     )
 
-    plt.bar(
+    bars = ax.barh(
         nomes,
-        valores
-    )
-
-    plt.xticks(
-        rotation=90
-    )
-
-    plt.xlabel(
-        "Variáveis"
-    )
-
-    plt.ylabel(
-        "Importância"
-    )
-
-    plt.title(
-        f"Importância das Variáveis - "
-        f"{type(modelo).__name__}"
-    )
-
-    plt.tight_layout()
-
-    plt.savefig(
-        os.path.join(
-            RESULTS_PATH,
-            "feature_importance.png"
+        valores,
+        color=plt.cm.viridis(
+            np.linspace(0.35, 0.95, len(valores))
         ),
-        dpi=200,
-        bbox_inches="tight"
+        height=0.68
     )
 
-    plt.close()
+    ax.set_title(
+        "FEATURE IMPORTANCE",
+        fontsize=16,
+        fontweight="bold",
+        loc="left",
+        pad=20
+    )
+
+    ax.set_xlabel(
+        "Importância",
+        fontsize=11,
+        labelpad=10
+    )
+
+    ax.set_ylabel(
+        "Variáveis",
+        fontsize=11,
+        labelpad=10
+    )
+
+    ax.grid(
+        axis="x",
+        alpha=0.5
+    )
+
+    ax.grid(
+        axis="y",
+        visible=False
+    )
+
+    for bar, value in zip(bars, valores):
+
+        ax.text(
+            value,
+            bar.get_y() + bar.get_height() / 2,
+            f"  {value:.3f}",
+            va="center",
+            color=TEXT,
+            fontsize=8
+        )
+
+    salvar_grafico(
+        fig,
+        "feature_importance.png"
+    )

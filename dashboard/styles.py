@@ -4,171 +4,259 @@ def apply_styles(st):
         """
         <style>
 
-        /* FUNDO GERAL */
+        /* =========================================
+           IDENTIDADE VISUAL — FRAUD ANALYTICS
+        ========================================= */
+
+        :root {
+            --background: #0B0E13;
+            --surface: #11151C;
+            --surface-hover: #171D27;
+            --border: #263140;
+            --text-primary: #F1F5F9;
+            --text-secondary: #94A3B8;
+            --blue: #3B82F6;
+            --blue-light: #60A5FA;
+            --green: #22C55E;
+            --red: #EF4444;
+            --cyan: #06B6D4;
+        }
+
+        /* =========================================
+           FUNDO E CONTEÚDO
+        ========================================= */
+
         .stApp {
             background:
                 radial-gradient(
-                    circle at 10% 0%,
-                    #172554 0%,
-                    #0b1120 40%,
-                    #070d19 100%
-                );
-            color: #e2e8f0;
+                    circle at 15% 0%,
+                    rgba(37, 99, 235, 0.10),
+                    transparent 35%
+                ),
+                var(--background);
+
+            color: var(--text-primary);
         }
 
-        /* CONTEUDO PRINCIPAL */
         .block-container {
+            max-width: 1550px;
             padding-top: 2rem;
             padding-bottom: 3rem;
-            max-width: 1500px;
         }
 
-        /* BARRA LATERAL */
+        /* =========================================
+           TIPOGRAFIA
+        ========================================= */
+
+        h1, h2, h3, h4 {
+            color: var(--text-primary) !important;
+            font-weight: 700 !important;
+            letter-spacing: -0.5px;
+        }
+
+        p, label, li {
+            color: #CBD5E1;
+        }
+
+        [data-testid="stCaptionContainer"] {
+            color: var(--text-secondary);
+        }
+
+        /* =========================================
+           BARRA LATERAL
+        ========================================= */
+
         [data-testid="stSidebar"] {
-            background: #0f172a;
-            border-right: 1px solid #1e293b;
+            background: #0E131B;
+            border-right: 1px solid var(--border);
         }
 
         [data-testid="stSidebar"] h1,
         [data-testid="stSidebar"] h2,
         [data-testid="stSidebar"] h3 {
-            color: #f8fafc !important;
+            color: var(--text-primary) !important;
         }
 
-        /* TITULOS */
-        h1, h2, h3 {
-            color: #f8fafc !important;
-            font-weight: 700;
-            letter-spacing: -0.4px;
+        [data-testid="stSidebar"] [data-testid="stMarkdownContainer"] p {
+            color: var(--text-secondary);
         }
 
-        p, label {
-            color: #cbd5e1;
+        [data-testid="stSidebar"] hr {
+            border-color: var(--border);
         }
 
-        /* CARTOES DE METRICAS */
+        /* =========================================
+           CARTÕES DE MÉTRICAS
+        ========================================= */
+
         [data-testid="stMetric"] {
             background: linear-gradient(
                 145deg,
-                #172554,
-                #111827
+                #171E29,
+                #11151C
             );
-            border: 1px solid #2563eb;
-            padding: 22px;
-            border-radius: 16px;
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.25);
-            transition: all 0.25s ease;
+
+            border: 1px solid #293548;
+            border-radius: 14px;
+            padding: 20px 22px;
+
+            box-shadow:
+                0 8px 24px rgba(0, 0, 0, 0.20);
+
+            transition:
+                border-color 0.2s ease,
+                transform 0.2s ease;
         }
 
         [data-testid="stMetric"]:hover {
-            border-color: #38bdf8;
-            transform: translateY(-3px);
-            box-shadow: 0 10px 30px rgba(14, 165, 233, 0.12);
+            border-color: var(--blue);
+            transform: translateY(-2px);
         }
 
         [data-testid="stMetricLabel"] {
-            color: #93c5fd !important;
-            font-size: 14px;
-            font-weight: 600;
+            color: var(--text-secondary) !important;
+            font-size: 13px !important;
+            font-weight: 600 !important;
         }
 
         [data-testid="stMetricValue"] {
-            color: #38bdf8 !important;
-            font-size: 27px;
-            font-weight: 800;
+            color: var(--text-primary) !important;
+            font-size: 27px !important;
+            font-weight: 750 !important;
         }
 
-        /* ABAS */
-        button[data-baseweb="tab"] {
-            color: #94a3b8;
+        [data-testid="stMetricDelta"] {
             font-weight: 600;
-            padding: 12px 18px;
+        }
+
+        /* =========================================
+           ABAS DE NAVEGAÇÃO
+        ========================================= */
+
+        button[data-baseweb="tab"] {
+            color: var(--text-secondary);
+            font-weight: 600;
+            padding: 13px 18px;
+            border-bottom: 2px solid transparent;
+        }
+
+        button[data-baseweb="tab"]:hover {
+            color: var(--blue-light);
         }
 
         button[data-baseweb="tab"][aria-selected="true"] {
-            color: #38bdf8;
+            color: var(--blue-light);
+            border-bottom-color: var(--blue);
         }
 
-        /* GRAFICOS E TABELAS */
+        /* =========================================
+           GRÁFICOS E TABELAS
+        ========================================= */
+
         [data-testid="stPlotlyChart"],
         [data-testid="stDataFrame"] {
-            background: #111827;
-            border: 1px solid #1e293b;
-            border-radius: 16px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 14px;
             padding: 10px;
         }
 
-        /* CABECALHO */
-        .hero-card {
-            background: linear-gradient(
-                120deg,
-                #172554 0%,
-                #1e1b4b 55%,
-                #0f172a 100%
-            );
-            border: 1px solid #2563eb;
-            border-radius: 20px;
-            padding: 32px;
-            margin-bottom: 28px;
-            box-shadow: 0 12px 35px rgba(0, 0, 0, 0.25);
+        [data-testid="stImage"] img {
+            border-radius: 12px;
         }
 
-        .hero-card h2 {
-            color: #f8fafc;
-            font-size: 30px;
-            margin-bottom: 10px;
+        /* =========================================
+           CABEÇALHOS E CONTAINERS
+        ========================================= */
+
+        [data-testid="stVerticalBlockBorderWrapper"] {
+            border-color: var(--border) !important;
+            border-radius: 16px;
         }
 
-        .hero-card p {
-            color: #bfdbfe;
-            font-size: 15px;
-            margin-bottom: 0;
-        }
+        /* =========================================
+           BOTÕES
+        ========================================= */
 
-        /* DESCRICOES */
-        .section-description {
-            color: #94a3b8;
-            font-size: 14px;
-        }
-
-        /* LINHAS DIVISORIAS */
-        hr {
-            border-color: #263449;
-        }
-
-        /* BOTOES */
         .stButton > button {
             background: linear-gradient(
-                90deg,
-                #2563eb,
-                #0891b2
+                100deg,
+                #2563EB,
+                #0891B2
             );
-            color: white;
-            border: none;
-            border-radius: 10px;
+
+            color: #FFFFFF;
+            border: 1px solid transparent;
+            border-radius: 9px;
             font-weight: 600;
+
             transition: all 0.2s ease;
         }
 
         .stButton > button:hover {
-            border: none;
-            box-shadow: 0 5px 18px rgba(14, 165, 233, 0.3);
-            color: white;
+            border-color: var(--blue-light);
+            box-shadow:
+                0 5px 18px rgba(59, 130, 246, 0.25);
+
+            color: #FFFFFF;
         }
 
-        /* SELETORES */
+        /* =========================================
+           SELETORES
+        ========================================= */
+
         [data-baseweb="select"] > div {
-            background-color: #111827;
-            border-color: #334155;
-            color: #e2e8f0;
+            background-color: var(--surface);
+            border-color: var(--border);
+            color: var(--text-primary);
         }
 
-        /* RODAPE */
+        /* =========================================
+           ALERTAS
+        ========================================= */
+
+        [data-testid="stAlert"] {
+            border-radius: 12px;
+            border: 1px solid var(--border);
+        }
+
+        /* =========================================
+           DIVISORES
+        ========================================= */
+
+        hr {
+            border-color: var(--border);
+        }
+
+        /* =========================================
+           RODAPÉ
+        ========================================= */
+
         footer {
             visibility: hidden;
         }
 
+        /* =========================================
+           RESPONSIVIDADE
+        ========================================= */
+
+        @media (max-width: 768px) {
+            .block-container {
+                padding-top: 1rem;
+                padding-left: 1rem;
+                padding-right: 1rem;
+            }
+
+            [data-testid="stMetric"] {
+                padding: 15px;
+            }
+
+            [data-testid="stMetricValue"] {
+                font-size: 22px !important;
+            }
+        }
+
         </style>
         """,
-        unsafe_allow_html=True
+        unsafe_allow_html=True,
     )

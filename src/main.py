@@ -1,3 +1,4 @@
+
 from data_loader import carregar_dados
 from preprocessing import preprocessar
 
@@ -18,13 +19,9 @@ from evaluate import (
 )
 
 from threshold_analysis import analisar_thresholds
-
 from explainability import explicar_modelo
 
-from config import (
-    MODELS_PATH,
-    RESULTS_PATH
-)
+from config import MODELS_PATH, RESULTS_PATH
 
 import pandas as pd
 import os
@@ -36,35 +33,21 @@ def main():
     print("DETECÇÃO DE FRAUDES EM CARTÃO DE CRÉDITO - V3")
     print("=" * 60)
 
-    os.makedirs(
-        RESULTS_PATH,
-        exist_ok=True
-    )
-
-    os.makedirs(
-        MODELS_PATH,
-        exist_ok=True
-    )
+    os.makedirs(RESULTS_PATH, exist_ok=True)
+    os.makedirs(MODELS_PATH, exist_ok=True)
 
     print("\n[1/7] Carregando dataset...")
 
     df = carregar_dados()
 
-    print(
-        f"Dataset carregado com {df.shape[0]:,} linhas"
-    )
-
-    print(
-        f"Dataset possui {df.shape[1]} colunas"
-    )
+    print(f"Dataset carregado com {df.shape[0]:,} linhas")
+    print(f"Dataset possui {df.shape[1]} colunas")
 
     print("\n[2/7] Realizando pré-processamento...")
 
     df = preprocessar(df)
 
-    print(
-        "Pré-processamento concluído."
-    )
+    print("Pré-processamento concluído.")
 
     print("\n[3/7] Separando treino e teste...")
 
@@ -77,33 +60,17 @@ def main():
         y_test
     ) = dividir_dados(df)
 
-    print(
-        f"\nTreino original: "
-        f"{X_train.shape[0]:,} registros"
-    )
-
-    print(
-        f"Treino balanceado: "
-        f"{X_train_smote.shape[0]:,} registros"
-    )
-
-    print(
-        f"Teste: "
-        f"{X_test.shape[0]:,} registros"
-    )
+    print(f"\nTreino original: {X_train.shape[0]:,} registros")
+    print(f"Treino balanceado: {X_train_smote.shape[0]:,} registros")
+    print(f"Teste: {X_test.shape[0]:,} registros")
 
     print("\n[4/7] Treinando modelos...")
 
     print("\n→ Logistic Regression")
 
-    logistic = treinar_logistic(
-        X_train,
-        y_train
-    )
+    logistic = treinar_logistic(X_train, y_train)
 
-    print(
-        "✓ Logistic Regression concluído."
-    )
+    print("✓ Logistic Regression concluído.")
 
     print("\n→ Random Forest")
 
@@ -112,9 +79,7 @@ def main():
         y_train_smote
     )
 
-    print(
-        "✓ Random Forest concluído."
-    )
+    print("✓ Random Forest concluído.")
 
     print("\n→ XGBoost")
 
@@ -123,46 +88,19 @@ def main():
         y_train_smote
     )
 
-    print(
-        "✓ XGBoost concluído."
-    )
+    print("✓ XGBoost concluído.")
 
     print("\n[5/7] Salvando modelos...")
 
-    salvar_modelo(
-        logistic,
-        "logistic"
-    )
-
-    salvar_modelo(
-        random_forest,
-        "random_forest"
-    )
-
-    salvar_modelo(
-        xgboost,
-        "xgboost"
-    )
+    salvar_modelo(logistic, "logistic")
+    salvar_modelo(random_forest, "random_forest")
+    salvar_modelo(xgboost, "xgboost")
 
     print("\n[6/7] Avaliando modelos...\n")
 
-    resultado_logistic = avaliar_modelo(
-        logistic,
-        X_test,
-        y_test
-    )
-
-    resultado_rf = avaliar_modelo(
-        random_forest,
-        X_test,
-        y_test
-    )
-
-    resultado_xgb = avaliar_modelo(
-        xgboost,
-        X_test,
-        y_test
-    )
+    resultado_logistic = avaliar_modelo(logistic, X_test, y_test)
+    resultado_rf = avaliar_modelo(random_forest, X_test, y_test)
+    resultado_xgb = avaliar_modelo(xgboost, X_test, y_test)
 
     resultados = pd.DataFrame([
         {
@@ -183,93 +121,87 @@ def main():
     print("COMPARAÇÃO DOS MODELOS")
     print("=" * 60)
 
-    print(
-        resultados.to_string(index=False)
-    )
+    print(resultados.to_string(index=False))
 
     caminho_metricas = os.path.join(
         RESULTS_PATH,
         "metricas.csv"
     )
 
-    resultados.to_csv(
-        caminho_metricas,
-        index=False
-    )
+    resultados.to_csv(caminho_metricas, index=False)
 
-    print(
-        f"\n✓ Métricas salvas em: "
-        f"{caminho_metricas}"
-    )
+    print(f"\n✓ Métricas salvas em: {caminho_metricas}")
 
-    melhor_modelo_info = resultados.sort_values(
-        by="F1",
-        ascending=False
-    ).iloc[0]
+    # Identifica o modelo com maior F1-Score
+    melhor_modelo_info = resultados.loc[
+        resultados["F1"].idxmax()
+    ]
 
-    nome_melhor_modelo = (
-        melhor_modelo_info["Modelo"]
-    )
+    nome_melhor_modelo = melhor_modelo_info["Modelo"]
 
-    if nome_melhor_modelo == "Logistic Regression":
+    modelos = {
+        "Logistic Regression": logistic,
+        "Random Forest": random_forest,
+        "XGBoost": xgboost
+    }
 
-        melhor_modelo = logistic
+    melhor_modelo = modelos[nome_melhor_modelo]
 
-    elif nome_melhor_modelo == "Random Forest":
+    salvar_modelo(melhor_modelo, "best_model")
 
-        melhor_modelo = random_forest
+    print(f"\n✓ Melhor modelo: {nome_melhor_modelo}")
+    print(f"✓ F1-Score: {melhor_modelo_info['F1']:.4f}")
 
-    else:
+    # ========================================================
+    # GERAÇÃO DOS GRÁFICOS INDIVIDUAIS
+    # ========================================================
 
-        melhor_modelo = xgboost
+    print("\nGerando gráficos individuais dos modelos...")
 
-    salvar_modelo(
-        melhor_modelo,
-        "best_model"
-    )
+    modelos_avaliados = {
+        "Logistic Regression": logistic,
+        "Random Forest": random_forest,
+        "XGBoost": xgboost
+    }
 
-    print(
-        f"\n✓ Melhor modelo: "
-        f"{nome_melhor_modelo}"
-    )
+    for nome, modelo in modelos_avaliados.items():
 
-    print(
-        f"✓ F1-Score: "
-        f"{melhor_modelo_info['F1']:.4f}"
-    )
+        print(f"\n→ Gerando gráficos: {nome}")
 
-    print("\nGerando gráficos...")
+        gerar_curva_roc(
+            modelo,
+            X_test,
+            y_test
+        )
 
-    gerar_curva_roc(
-        xgboost,
-        X_test,
-        y_test
-    )
+        gerar_curva_precision_recall(
+            modelo,
+            X_test,
+            y_test
+        )
 
-    gerar_curva_precision_recall(
-        xgboost,
-        X_test,
-        y_test
-    )
+        gerar_matriz_confusao(
+            modelo,
+            X_test,
+            y_test
+        )
 
-    gerar_matriz_confusao(
-        xgboost,
-        X_test,
-        y_test
-    )
+        print(f"✓ Gráficos de {nome} gerados.")
 
+    # Importância das variáveis permanece no XGBoost
+    # para manter a análise atual do projeto.
     gerar_importancia_variaveis(
         xgboost,
         X_train_smote
     )
 
-    print(
-        "✓ Gráficos salvos na pasta results/"
-    )
+    print("\n✓ Gráficos salvos na pasta results/")
 
-    print(
-        "\nAnalisando diferentes thresholds..."
-    )
+    # ========================================================
+    # ANÁLISE DE THRESHOLD
+    # ========================================================
+
+    print("\nAnalisando diferentes thresholds...")
 
     melhor_threshold = analisar_thresholds(
         xgboost,
@@ -297,6 +229,10 @@ def main():
         f"{melhor_threshold['F1']:.4f}"
     )
 
+    # ========================================================
+    # EXPLICABILIDADE SHAP
+    # ========================================================
+
     print("\nGerando explicabilidade SHAP...")
 
     explicar_modelo(
@@ -306,9 +242,7 @@ def main():
         nome_arquivo="shap_local.png"
     )
 
-    print(
-        "\n✓ Explicabilidade SHAP processada."
-    )
+    print("\n✓ Explicabilidade SHAP processada.")
 
     print("\n" + "=" * 60)
     print("PROJETO FINALIZADO COM SUCESSO")
